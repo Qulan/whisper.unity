@@ -75,7 +75,7 @@ build_android() {
   mkdir -p vulkan_headers/vulkan
   echo "Downloading Vulkan C++ headers version 1.3.203 to match Android NDK..."
   curl -L -o vulkan_headers/vulkan/vulkan.hpp \
-    https://raw.githubusercontent.com/KhronosGroup/Vulkan-Hpp/v1.3.203/vulkan/vulkan.hpp
+    "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Hpp/sdk-1.3.203/vulkan/vulkan.hpp"
   
   cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" \
   -DANDROID_PLATFORM=android-24 \
@@ -101,7 +101,6 @@ build_android() {
   cp "$artifact_path"/*/*.a "$target_path" 2>/dev/null || true
   echo "Build files copied to $target_path"
 }
-
 if [ "$targets" = "all" ]; then
   build_mac
   build_ios
