@@ -74,8 +74,20 @@ build_android() {
   # Download Vulkan C++ headers that match Android NDK's Vulkan version (1.3.203)
   mkdir -p vulkan_headers/vulkan
   echo "Downloading Vulkan C++ headers version 1.3.203 to match Android NDK..."
-  curl -L -o vulkan_headers/vulkan/vulkan.hpp \
-    "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Hpp/sdk-1.3.203/vulkan/vulkan.hpp"
+  
+  # Try downloading with wget (more reliable in CI environments)
+  if ! wget -q -O vulkan_headers/vulkan/vulkan.hpp \
+    "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Hpp/vulkan-sdk-1.3.203.0/vulkan/vulkan.hpp"; then
+    echo "Failed to download Vulkan C++ headers"
+    exit 1
+  fi
+  
+  # Verify the file was downloaded correctly
+  if ! grep -q "VULKAN_HPP" vulkan_headers/vulkan/vulkan.hpp; then
+    echo "Downloaded file appears to be invalid (404 or similar)"
+    cat vulkan_headers/vulkan/vulkan.hpp
+    exit 1
+  fi
   
   cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" \
   -DANDROID_PLATFORM=android-24 \
