@@ -71,10 +71,11 @@ build_android() {
   clean_build
   echo "Starting building for Android..."
   
-  # Copy Vulkan C++ headers to the build directory so Android can find them
+  # Download Vulkan C++ headers that match Android NDK's Vulkan version (1.3.203)
   mkdir -p vulkan_headers/vulkan
-  cp /usr/include/vulkan/vulkan.hpp vulkan_headers/vulkan/
-  cp /usr/include/vulkan/vulkan_*.hpp vulkan_headers/vulkan/ 2>/dev/null || true
+  echo "Downloading Vulkan C++ headers version 1.3.203 to match Android NDK..."
+  curl -L -o vulkan_headers/vulkan/vulkan.hpp \
+    https://raw.githubusercontent.com/KhronosGroup/Vulkan-Hpp/v1.3.203/vulkan/vulkan.hpp
   
   cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" \
   -DANDROID_PLATFORM=android-24 \
