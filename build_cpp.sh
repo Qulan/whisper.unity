@@ -71,25 +71,18 @@ build_android() {
   clean_build
   echo "Starting building for Android..."
   
-  # Download Vulkan C++ bindings from Vulkan-Hpp main branch
-  mkdir -p vulkan_headers/vulkan
-  echo "Downloading Vulkan C++ bindings (vulkan.hpp) from main branch..."
+  # Clone the entire Vulkan-Hpp repository to get all headers
+  echo "Cloning Vulkan-Hpp repository for header files..."
+  git clone --depth 1 --branch main https://github.com/KhronosGroup/Vulkan-Hpp.git vulkan_hpp_temp
   
-  if ! wget -q -O vulkan_headers/vulkan/vulkan.hpp \
-    "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Hpp/main/vulkan/vulkan.hpp"; then
-    echo "ERROR: Failed to download Vulkan C++ headers"
-    exit 1
-  fi
+  # Copy the vulkan directory with all headers
+  mkdir -p vulkan_headers
+  cp -r vulkan_hpp_temp/vulkan vulkan_headers/
   
-  # Verify we got actual C++ code, not a 404 page
-  if ! grep -q "VULKAN_HPP" vulkan_headers/vulkan/vulkan.hpp; then
-    echo "ERROR: Downloaded file appears to be invalid"
-    echo "First 20 lines of file:"
-    head -20 vulkan_headers/vulkan/vulkan.hpp
-    exit 1
-  fi
+  # Clean up temporary clone
+  rm -rf vulkan_hpp_temp
   
-  echo "✓ Vulkan C++ bindings downloaded successfully"
+  echo "✓ Vulkan C++ binding headers copied successfully"
   
   cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" \
   -DANDROID_PLATFORM=android-24 \
