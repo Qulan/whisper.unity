@@ -172,6 +172,11 @@ jobs:
           sdkmanager --install "build-tools;33.0.2"
           sdkmanager --install "cmake;3.22.1"
           sdkmanager --install "ndk;25.1.8937393"
+      - name: Install Vulkan SDK
+        run: |
+          wget -q https://sdk.lunarg.com/sdk/download/latest/linux/vulkan-sdk.tar.gz
+          tar -xzf vulkan-sdk.tar.gz
+          export VULKAN_SDK=$(pwd)/vulkan-sdk/x86_64
           
       - name: Clone whisper.unity
         uses: actions/checkout@v3
