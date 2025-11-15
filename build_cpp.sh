@@ -71,6 +71,11 @@ build_android() {
   clean_build
   echo "Starting building for Android..."
   
+  # Copy Vulkan C++ headers to the build directory so Android can find them
+  mkdir -p vulkan_headers/vulkan
+  cp /usr/include/vulkan/vulkan.hpp vulkan_headers/vulkan/
+  cp /usr/include/vulkan/vulkan_*.hpp vulkan_headers/vulkan/ 2>/dev/null || true
+  
   cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" \
   -DANDROID_PLATFORM=android-24 \
   -DANDROID_ABI=arm64-v8a \
@@ -80,8 +85,7 @@ build_android() {
   -DWHISPER_BUILD_TESTS=OFF \
   -DWHISPER_BUILD_EXAMPLES=OFF \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -isystem /usr/include" \
-  -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -isystem /usr/include" \
+  -DCMAKE_CXX_FLAGS="-I${build_path}/vulkan_headers" \
   ../
   
   make
