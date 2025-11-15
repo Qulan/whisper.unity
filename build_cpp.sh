@@ -67,27 +67,50 @@ build_ios() {
   echo "Build files copied to $target_path"
 }
 
+#build_android() {
+#  clean_build
+#  echo "Starting building for Android..."
+#
+#  cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" -DANDROID_ABI=arm64-v8a -DGGML_VULKAN=ON  -DGGML_OPENMP=OFF -DBUILD_SHARED_LIBS=OFF \
+#  -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF -DCMAKE_BUILD_TYPE=Release ../
+#  make
+#
+#  echo "Build for Android complete!"
+#
+#  rm $unity_project/Packages/com.whisper.unity/Plugins/Android/*.a
+#
+#  artifact_path="$build_path/src/libwhisper.a"
+#  target_path="$unity_project/Packages/com.whisper.unity/Plugins/Android/libwhisper.a"
+#  cp "$artifact_path" "$target_path"
+#
+#  artifact_path=$build_path/ggml/src
+#  target_path=$unity_project/Packages/com.whisper.unity/Plugins/Android/
+#  cp "$artifact_path"/*.a "$target_path"
+#  cp "$artifact_path"/*/*.a "$target_path"
+#
+#  echo "Build files copied to $target_path"
+#}
+
 build_android() {
   clean_build
   echo "Starting building for Android..."
-
-  cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" -DANDROID_ABI=arm64-v8a -DGGML_VULKAN=ON  -DGGML_OPENMP=OFF -DBUILD_SHARED_LIBS=OFF \
+  cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" -DANDROID_ABI=arm64-v8a -DGGML_VULKAN=ON -DGGML_OPENMP=OFF -DBUILD_SHARED_LIBS=OFF \
   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF -DCMAKE_BUILD_TYPE=Release ../
   make
-
   echo "Build for Android complete!"
-
-  rm $unity_project/Packages/com.whisper.unity/Plugins/Android/*.a
-
+  rm -f $unity_project/Packages/com.whisper.unity/Plugins/Android/*.a
   artifact_path="$build_path/src/libwhisper.a"
   target_path="$unity_project/Packages/com.whisper.unity/Plugins/Android/libwhisper.a"
   cp "$artifact_path" "$target_path"
-
   artifact_path=$build_path/ggml/src
   target_path=$unity_project/Packages/com.whisper.unity/Plugins/Android/
-  cp "$artifact_path"/*.a "$target_path"
-  cp "$artifact_path"/*/*.a "$target_path"
-
+  cp "$artifact_path"/*.a "$target_path" 2>/dev/null || true
+  if [ -d "$artifact_path/ggml-cpu" ]; then
+    cp "$artifact_path"/ggml-cpu/*.a "$target_path" 2>/dev/null || true
+  fi
+  if [ -d "$artifact_path/ggml-vulkan" ]; then
+    cp "$artifact_path"/ggml-vulkan/*.a "$target_path" 2>/dev/null || true
+  fi
   echo "Build files copied to $target_path"
 }
 
