@@ -69,28 +69,7 @@ build_ios() {
 
 build_android() {
   clean_build
-  echo "Starting building for Android..."
-  
-  # Download Vulkan C++ headers - use a version that actually exists
-  mkdir -p vulkan_headers/vulkan
-  echo "Downloading Vulkan C++ headers..."
-  
-  # Use v1.3.296 - the last 1.3.x version that should work with NDK 25
-  if ! wget -q -O vulkan_headers/vulkan/vulkan.hpp \
-    "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Hpp/v1.3.296/vulkan/vulkan.hpp"; then
-    echo "Failed to download Vulkan C++ headers"
-    exit 1
-  fi
-  
-  # Verify we got actual C++ code, not a 404 page
-  if ! grep -q "VULKAN_HPP" vulkan_headers/vulkan/vulkan.hpp; then
-    echo "Downloaded file appears to be invalid (likely 404)"
-    echo "File contents:"
-    cat vulkan_headers/vulkan/vulkan.hpp
-    exit 1
-  fi
-  
-  echo "Vulkan headers downloaded successfully"
+  echo "Starting building for Android (using NDK's Vulkan headers)..."
   
   cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" \
   -DANDROID_PLATFORM=android-24 \
@@ -101,7 +80,6 @@ build_android() {
   -DWHISPER_BUILD_TESTS=OFF \
   -DWHISPER_BUILD_EXAMPLES=OFF \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_CXX_FLAGS="-I${build_path}/vulkan_headers" \
   ../
   
   make
