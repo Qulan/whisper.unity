@@ -94,8 +94,22 @@ build_ios() {
 build_android() {
   clean_build
   echo "Starting building for Android..."
-  cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" -DANDROID_ABI=arm64-v8a -DGGML_VULKAN=ON -DGGML_OPENMP=OFF -DBUILD_SHARED_LIBS=OFF \
-  -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF -DCMAKE_BUILD_TYPE=Release ../
+  
+  # Set NDK path
+  ANDROID_NDK_PATH=$(dirname $(dirname "$android_sdk_path"))
+  
+  cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" \
+  -DANDROID_ABI=arm64-v8a \
+  -DGGML_VULKAN=ON \
+  -DGGML_OPENMP=OFF \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DWHISPER_BUILD_TESTS=OFF \
+  -DWHISPER_BUILD_EXAMPLES=OFF \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DVulkan_INCLUDE_DIR="$ANDROID_NDK_PATH/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" \
+  -DVulkan_LIBRARY="$ANDROID_NDK_PATH/sources/third_party/vulkan/src/build-android/jniLibs/arm64-v8a/libvulkan.so" \
+  ../
+  
   make
   echo "Build for Android complete!"
   rm -f $unity_project/Packages/com.whisper.unity/Plugins/Android/*.a
