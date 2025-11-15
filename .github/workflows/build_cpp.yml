@@ -156,7 +156,7 @@ jobs:
   build-android:
     name: Build for Android (arm64-v8a)
     if: ${{ contains(fromJson('["android", "all"]'), github.event.inputs.target_platform) }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:          
       - name: Install Java
         uses: actions/setup-java@v3
@@ -172,12 +172,13 @@ jobs:
           sdkmanager --install "build-tools;33.0.2"
           sdkmanager --install "cmake;3.22.1"
           sdkmanager --install "ndk;25.1.8937393"
-      - name: Install Vulkan SDK
+      - name: Dependencies Vulkan
+        id: depends
         run: |
           wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
           sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list https://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
           sudo apt-get update -y
-          sudo apt-get install -y vulkan-sdk
+          sudo apt-get install -y build-essential mesa-vulkan-drivers vulkan-sdk libcurl4-openssl-dev
           
       - name: Clone whisper.unity
         uses: actions/checkout@v3
