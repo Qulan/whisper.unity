@@ -71,9 +71,6 @@ build_android() {
   clean_build
   echo "Starting building for Android..."
   
-  # Set Vulkan SDK path (installed via apt-get earlier)
-  export VULKAN_SDK=/usr
-  
   cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" \
   -DANDROID_PLATFORM=android-24 \
   -DANDROID_ABI=arm64-v8a \
@@ -83,7 +80,8 @@ build_android() {
   -DWHISPER_BUILD_TESTS=OFF \
   -DWHISPER_BUILD_EXAMPLES=OFF \
   -DCMAKE_BUILD_TYPE=Release \
-  -DVulkan_INCLUDE_DIR="/usr/include" \
+  -DCMAKE_CXX_FLAGS="-I/usr/include" \
+  -DCMAKE_C_FLAGS="-I/usr/include" \
   ../
   
   make
