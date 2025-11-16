@@ -89,6 +89,7 @@ build_android() {
   -DWHISPER_BUILD_EXAMPLES=OFF \
   -DCMAKE_BUILD_TYPE=Release \
   -DVulkan_INCLUDE_DIR="${build_path}/vulkan_headers_repo/include" \
+  ../
 
   make
   echo "Build for Android complete!"
