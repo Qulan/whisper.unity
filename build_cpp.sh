@@ -71,9 +71,13 @@ build_android() {
   clean_build
   echo "Starting building for Android..."
   
-  # Clone the entire Vulkan-Hpp repository to get all headers
-  echo "Cloning Vulkan-Hpp repository for header files..."
-  git clone --depth 1 --branch main https://github.com/KhronosGroup/Vulkan-Hpp.git vulkan_hpp_temp
+  # Clone Vulkan-Hpp at version 1.2.203 to match NDK 25 (Vulkan 1.3.203)
+  echo "Cloning Vulkan-Hpp repository (v1.2.203 to match NDK's Vulkan 1.3.203)..."
+  
+  if ! git clone --depth 1 --branch v1.2.203 https://github.com/KhronosGroup/Vulkan-Hpp.git vulkan_hpp_temp; then
+    echo "ERROR: Could not clone Vulkan-Hpp v1.2.203"
+    exit 1
+  fi
   
   # Copy the vulkan directory with all headers
   mkdir -p vulkan_headers
@@ -82,7 +86,7 @@ build_android() {
   # Clean up temporary clone
   rm -rf vulkan_hpp_temp
   
-  echo "✓ Vulkan C++ binding headers copied successfully"
+  echo "✓ Vulkan C++ binding headers (v1.2.203) copied successfully"
   
   cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" \
   -DANDROID_PLATFORM=android-24 \
