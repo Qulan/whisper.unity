@@ -89,6 +89,21 @@ build_android() {
   -DWHISPER_BUILD_EXAMPLES=OFF \
   -DCMAKE_BUILD_TYPE=Release \
   -DVulkan_INCLUDE_DIR="${build_path}/vulkan_headers_repo/include" \
+
+  make
+  echo "Build for Android complete!"
+  
+  # Copy artifacts (your existing code)
+  rm -f $unity_project/Packages/com.whisper.unity/Plugins/Android/*.a
+  artifact_path="$build_path/src/libwhisper.a"
+  target_path="$unity_project/Packages/com.whisper.unity/Plugins/Android/libwhisper.a"
+  cp "$artifact_path" "$target_path"
+  artifact_path=$build_path/ggml/src
+  target_path=$unity_project/Packages/com.whisper.unity/Plugins/Android/
+  cp "$artifact_path"/*.a "$target_path" 2>/dev/null || true
+  cp "$artifact_path"/*/*.a "$target_path" 2>/dev/null || true
+  echo "Build files copied to $target_path"
+}
 if [ "$targets" = "all" ]; then
   build_mac
   build_ios
