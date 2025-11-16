@@ -71,11 +71,13 @@ build_android() {
   clean_build
   echo "Starting building for Android..."
   
-  # Clone Vulkan-Hpp at version 1.2.203 to match NDK 25 (Vulkan 1.3.203)
-  echo "Cloning Vulkan-Hpp repository (v1.2.203 to match NDK's Vulkan 1.3.203)..."
+  # Clone Vulkan-Hpp at v1.3.237 for PipelineRobustness support
+  echo "Cloning Vulkan-Hpp repository (v1.3.237 for ggml-vulkan compatibility)..."
   
-  if ! git clone --depth 1 --branch v1.2.203 https://github.com/KhronosGroup/Vulkan-Hpp.git vulkan_hpp_temp; then
-    echo "ERROR: Could not clone Vulkan-Hpp v1.2.203"
+  VULKAN_VERSION="v1.3.237"  # Change this to test different versions
+  
+  if ! git clone --depth 1 --branch $VULKAN_VERSION https://github.com/KhronosGroup/Vulkan-Hpp.git vulkan_hpp_temp; then
+    echo "ERROR: Could not clone Vulkan-Hpp $VULKAN_VERSION"
     exit 1
   fi
   
@@ -86,7 +88,7 @@ build_android() {
   # Clean up temporary clone
   rm -rf vulkan_hpp_temp
   
-  echo "✓ Vulkan C++ binding headers (v1.2.203) copied successfully"
+  echo "✓ Vulkan C++ binding headers ($VULKAN_VERSION) copied successfully"
   
   cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" \
   -DANDROID_PLATFORM=android-24 \
