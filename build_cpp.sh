@@ -70,26 +70,9 @@ build_ios() {
 build_android() {
   clean_build
   echo "Starting building for Android..."
+  echo "Using NDK: $android_sdk_path"
   
-  # Clone Vulkan-Hpp at v1.3.237 for PipelineRobustness support
-  echo "Cloning Vulkan-Hpp repository (v1.3.237 for ggml-vulkan compatibility)..."
-  
-  VULKAN_VERSION="v1.3.237"  # Change this to test different versions
-  
-  if ! git clone --depth 1 --branch $VULKAN_VERSION https://github.com/KhronosGroup/Vulkan-Hpp.git vulkan_hpp_temp; then
-    echo "ERROR: Could not clone Vulkan-Hpp $VULKAN_VERSION"
-    exit 1
-  fi
-  
-  # Copy the vulkan directory with all headers
-  mkdir -p vulkan_headers
-  cp -r vulkan_hpp_temp/vulkan vulkan_headers/
-  
-  # Clean up temporary clone
-  rm -rf vulkan_hpp_temp
-  
-  echo "✓ Vulkan C++ binding headers ($VULKAN_VERSION) copied successfully"
-  
+  # Try WITHOUT external headers first (NDK r27c has Vulkan 1.3.275)
   cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" \
   -DANDROID_PLATFORM=android-24 \
   -DANDROID_ABI=arm64-v8a \
@@ -99,11 +82,12 @@ build_android() {
   -DWHISPER_BUILD_TESTS=OFF \
   -DWHISPER_BUILD_EXAMPLES=OFF \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_CXX_FLAGS="-I${build_path}/vulkan_headers" \
   ../
   
   make
   echo "Build for Android complete!"
+  
+  # Copy artifacts (your existing code)
   rm -f $unity_project/Packages/com.whisper.unity/Plugins/Android/*.a
   artifact_path="$build_path/src/libwhisper.a"
   target_path="$unity_project/Packages/com.whisper.unity/Plugins/Android/libwhisper.a"
