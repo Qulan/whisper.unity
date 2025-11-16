@@ -154,7 +154,7 @@ jobs:
           if-no-files-found: error
 
   build-android:
-    name: Build for Android (arm64-v8a)
+    name: Build for Android (arm64-v8a, NDK r27c)
     if: ${{ contains(fromJson('["android", "all"]'), github.event.inputs.target_platform) }}
     runs-on: ubuntu-22.04
     steps:          
@@ -167,42 +167,25 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Install Android NDK
+      - name: Install Android NDK r27c
         run: |
           sdkmanager --install "build-tools;33.0.2"
           sdkmanager --install "cmake;3.22.1"
-          sdkmanager --install "ndk;25.1.8937393"
-      - name: Test Vulkan Header Download
+          sdkmanager --install "ndk;27.0.12077973"
+          
+      - name: Verify NDK Installation
         run: |
-          # Test different possible URLs
-          echo "Testing URL formats..."
+          echo "NDK installed at: $ANDROID_HOME/ndk/27.0.12077973"
+          ls -la $ANDROID_HOME/ndk/27.0.12077973/
+          echo "Vulkan headers version in NDK:"
+          grep "VK_HEADER_VERSION" $ANDROID_HOME/ndk/27.0.12077973/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/vulkan/vulkan_core.h || echo "Could not find version"
           
-          # Try format 1: v1.3.203
-          echo "Trying v1.3.203..."
-          wget --spider "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Hpp/v1.3.203/vulkan/vulkan.hpp" 2>&1 | grep -q "200 OK" && echo "✓ v1.3.203 works!" || echo "✗ v1.3.203 failed"
-          
-          # Try format 2: sdk-1.3.203
-          echo "Trying sdk-1.3.203..."
-          wget --spider "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Hpp/sdk-1.3.203/vulkan/vulkan.hpp" 2>&1 | grep -q "200 OK" && echo "✓ sdk-1.3.203 works!" || echo "✗ sdk-1.3.203 failed"
-          
-          # Try format 3: vulkan-sdk-1.3.203.0
-          echo "Trying vulkan-sdk-1.3.203.0..."
-          wget --spider "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Hpp/vulkan-sdk-1.3.203.0/vulkan/vulkan.hpp" 2>&1 | grep -q "200 OK" && echo "✓ vulkan-sdk-1.3.203.0 works!" || echo "✗ vulkan-sdk-1.3.203.0 failed"
-          
-          # Try format 4: sdk-1.3.203.0
-          echo "Trying sdk-1.3.203.0..."
-          wget --spider "https://raw.githubusercontent.com/KhronosGroup/Vulkan-Hpp/sdk-1.3.203.0/vulkan/vulkan.hpp" 2>&1 | grep -q "200 OK" && echo "✓ sdk-1.3.203.0 works!" || echo "✗ sdk-1.3.203.0 failed"
-          
-          # List available tags to see what format they use
-          echo "Fetching available tags..."
-          curl -s "https://api.github.com/repos/KhronosGroup/Vulkan-Hpp/tags" | grep '"name"' | head -20
-      - name: Dependencies Vulkan
-        id: depends
+      - name: Dependencies (Vulkan SDK for shader compilation)
         run: |
           wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
           sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list https://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
           sudo apt-get update -y
-          sudo apt-get install -y build-essential mesa-vulkan-drivers vulkan-sdk libcurl4-openssl-dev
+          sudo apt-get install -y build-essential vulkan-sdk
           
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -219,7 +202,7 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp.sh ${{ github.workspace }}/whisper-cpp/ android $ANDROID_HOME/ndk/25.1.8937393/build/cmake/android.toolchain.cmake
+          sh build_cpp.sh ${{ github.workspace }}/whisper-cpp/ android $ANDROID_HOME/ndk/27.0.12077973/build/cmake/android.toolchain.cmake
           
       - name: Upload results
         uses: actions/upload-artifact@v4
