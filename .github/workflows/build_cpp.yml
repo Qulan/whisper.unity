@@ -188,10 +188,10 @@ jobs:
           
       - name: Verify NDK Installation
         run: |
-          echo "NDK installed at: $ANDROID_HOME/ndk/27.0.12077973"
-          ls -la $ANDROID_HOME/ndk/27.0.12077973/
-          echo "Vulkan headers version in NDK:"
-          grep "VK_HEADER_VERSION" $ANDROID_HOME/ndk/27.0.12077973/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/vulkan/vulkan_core.h || echo "Could not find version"
+          echo "NDK installed at: $ANDROID_HOME/ndk/25.2.9519653"
+          ls -la $ANDROID_HOME/ndk/25.2.9519653/
+          echo "Vulkan headers version in NDK r25c:"
+          grep "VK_HEADER_VERSION" $ANDROID_HOME/ndk/25.2.9519653/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/vulkan/vulkan_core.h || echo "Could not find version"
           
       - name: Dependencies (Vulkan SDK for shader compilation)
         run: |
