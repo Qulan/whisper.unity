@@ -167,31 +167,55 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Install Android NDK
+      - name: Install Android NDK r25c
         run: |
           sdkmanager --install "build-tools;33.0.2"
           sdkmanager --install "cmake;3.22.1"
-          sdkmanager --install "ndk;25.1.8937393"
+          
+          # Try to install NDK r25c via sdkmanager
+          echo "=== Attempting to install NDK r25c via sdkmanager ==="
+          if sdkmanager --install "ndk;25.2.9519653"; then
+            echo "NDK r25c installed via sdkmanager"
+          else
+            echo "NDK r25c not available via sdkmanager, downloading directly..."
+            mkdir -p $ANDROID_HOME/ndk
+            cd /tmp
+            wget -q https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+            echo "Extracting NDK r25c..."
+            unzip -q android-ndk-r25c-linux.zip
+            mv android-ndk-r25c $ANDROID_HOME/ndk/25.2.9519653
+            echo "NDK r25c installed manually"
+          fi
+          
+      
 
-      - name: Download Vulkan Headers from NDK r25
+      - name: Download Vulkan Headers from NDK r25c
         run: |
-          mkdir -p ${{ github.workspace }}/vulkan-headers-r25
-          cd ${{ github.workspace }}/vulkan-headers-r25
-          # Download the headers from the NDK r25 tag
+          mkdir -p ${{ github.workspace }}/vulkan-headers-r25c
+          cd ${{ github.workspace }}/vulkan-headers-r25c
           git init
           git remote add origin https://android.googlesource.com/platform/external/vulkan-headers
-          git fetch --depth 1 origin refs/tags/ndk-r25
+          git fetch --depth 1 origin refs/tags/ndk-r25c
           git checkout FETCH_HEAD
-          echo "Downloaded Vulkan headers from NDK r25"
+          echo "Downloaded Vulkan headers from NDK r25c"
           ls -la include/vulkan/
+          echo "Vulkan header version:"
           grep "VK_HEADER_VERSION" include/vulkan/vulkan_core.h || echo "Could not find version"
           
-      - name: Verify NDK Installation
+      - name: Verify NDK r25c Installation
         run: |
-          echo "NDK installed at: $ANDROID_HOME/ndk/25.2.9519653"
-          ls -la $ANDROID_HOME/ndk/25.1.8937393/
-          echo "Vulkan headers version in NDK r25c:"
-          grep "VK_HEADER_VERSION" $ANDROID_HOME/ndk/25.1.8937393/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/vulkan/vulkan_core.h || echo "Could not find version"
+          if [ -d "$ANDROID_HOME/ndk/25.2.9519653" ]; then
+            echo "✓ NDK r25c found at: $ANDROID_HOME/ndk/25.2.9519653"
+            ls -la $ANDROID_HOME/ndk/25.2.9519653/ | head -20
+            echo ""
+            echo "Vulkan headers version in NDK r25c:"
+            grep "VK_HEADER_VERSION" $ANDROID_HOME/ndk/25.2.9519653/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/vulkan/vulkan_core.h
+          else
+            echo "✗ ERROR: NDK r25c not found!"
+            echo "Available NDK versions:"
+            ls -la $ANDROID_HOME/ndk/ || echo "No NDK directory"
+            exit 1
+          fi
           
       - name: Dependencies (Vulkan SDK for shader compilation)
         run: |
