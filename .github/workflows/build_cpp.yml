@@ -154,7 +154,7 @@ jobs:
           if-no-files-found: error
 
   build-android:
-    name: Build for Android (arm64-v8a, NDK r27c)
+    name: Build for Android (arm64-v8a, NDK r25)
     if: ${{ contains(fromJson('["android", "all"]'), github.event.inputs.target_platform) }}
     runs-on: ubuntu-22.04
     steps:          
@@ -167,11 +167,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Install Android NDK r27c
+      - name: Install Android NDK
         run: |
           sdkmanager --install "build-tools;33.0.2"
           sdkmanager --install "cmake;3.22.1"
-          sdkmanager --install "ndk;27.0.12077973"
+          sdkmanager --install "ndk;25.1.8937393"
           
       - name: Verify NDK Installation
         run: |
