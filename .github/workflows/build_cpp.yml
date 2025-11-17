@@ -172,6 +172,19 @@ jobs:
           sdkmanager --install "build-tools;33.0.2"
           sdkmanager --install "cmake;3.22.1"
           sdkmanager --install "ndk;25.1.8937393"
+
+      - name: Download Vulkan Headers from NDK r25
+        run: |
+          mkdir -p ${{ github.workspace }}/vulkan-headers-r25
+          cd ${{ github.workspace }}/vulkan-headers-r25
+          # Download the headers from the NDK r25 tag
+          git init
+          git remote add origin https://android.googlesource.com/platform/external/vulkan-headers
+          git fetch --depth 1 origin refs/tags/ndk-r25
+          git checkout FETCH_HEAD
+          echo "Downloaded Vulkan headers from NDK r25"
+          ls -la include/vulkan/
+          grep "VK_HEADER_VERSION" include/vulkan/vulkan_core.h || echo "Could not find version"
           
       - name: Verify NDK Installation
         run: |
