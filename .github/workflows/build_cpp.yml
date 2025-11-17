@@ -239,7 +239,7 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp.sh ${{ github.workspace }}/whisper-cpp/ android $ANDROID_HOME/ndk/27.0.12077973/build/cmake/android.toolchain.cmake
+          sh build_cpp.sh ${{ github.workspace }}/whisper-cpp/ android $ANDROID_HOME/ndk/25.2.9519653/build/cmake/android.toolchain.cmake
           
       - name: Upload results
         uses: actions/upload-artifact@v4
