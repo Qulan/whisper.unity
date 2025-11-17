@@ -71,14 +71,17 @@ build_android() {
   clean_build
   echo "Starting building for Android with NDK r27c..."
   
-  # Download Vulkan-Headers v1.3.275 (matches NDK r27c's Vulkan version)
-  VULKAN_VERSION="v1.3.275"
+  # Use NDK r25 Vulkan headers if provided
+  VULKAN_INCLUDE_DIR="${VULKAN_HEADERS_PATH:-}"
   
-  echo "Downloading Vulkan-Headers ($VULKAN_VERSION)..."
-  git clone --depth 1 --branch $VULKAN_VERSION \
-       https://github.com/KhronosGroup/Vulkan-Headers.git vulkan_headers_repo
+  if [ -n "$VULKAN_INCLUDE_DIR" ]; then
+    echo "Using custom Vulkan headers from: $VULKAN_INCLUDE_DIR"
+    VULKAN_CMAKE_ARGS="-DVulkan_INCLUDE_DIR=$VULKAN_INCLUDE_DIR"
+  else
+    echo "Using default NDK Vulkan headers"
+    VULKAN_CMAKE_ARGS=""
+  fi
   
-  # Point CMake to use these headers instead of NDK's incomplete headers
   cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" \
   -DANDROID_PLATFORM=android-24 \
   -DANDROID_ABI=arm64-v8a \
@@ -88,13 +91,13 @@ build_android() {
   -DWHISPER_BUILD_TESTS=OFF \
   -DWHISPER_BUILD_EXAMPLES=OFF \
   -DCMAKE_BUILD_TYPE=Release \
-  -DVulkan_INCLUDE_DIR="${build_path}/vulkan_headers_repo/include" \
+  $VULKAN_CMAKE_ARGS \
   ../
-
+  
   make
   echo "Build for Android complete!"
   
-  # Copy artifacts (your existing code)
+  # Copy artifacts
   rm -f $unity_project/Packages/com.whisper.unity/Plugins/Android/*.a
   artifact_path="$build_path/src/libwhisper.a"
   target_path="$unity_project/Packages/com.whisper.unity/Plugins/Android/libwhisper.a"
